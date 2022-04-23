@@ -1,0 +1,508 @@
+---
+title: "Case Study: How Does A Bike-Share Navigate A Speedy Success? "
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+This case study is part of the Google Data Analytics Professional Certificate.Here, I would apply data analysis concepts, techniques, and resources to solve a business problem.
+
+## Scenario
+I am a Data Analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago. The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. Therefore, your team wants to understand how casual riders and annual members use Cyclistic bikes differently.
+
+## Objective
+The goal is to convert the casual riders into annual members.
+
+## Data Sources
+The datasets for this case study have been provided by Motivate International Inc. under this [licence](https://www.divvybikes.com/data-license-agreement). I will use the 12 Month historical data (From Nov 2020 to Oct 2021) to perform analysis and identify trends. Data can be found on this website (https://divvy-tripdata.s3.amazonaws.com/index.html)
+
+The data-privacy issues prohibit you from using riders’ personally identifiable information. This means that you won’t be able to trace back the information to individual users, such as credit card information or rider's personal information.
+
+The data’s integrity and usefulness is determined through ROCCC:
+
+Reliability & Originality : This data can be considered as reliable and original since Divvy data, owned by the City of Chicago is a reliable source which is made available to the public.
+
+Comprehension: The datasets have hundreds of thousands of observations for each trip taken monthly with labelled columns giving information about the trip so the data is comprehensive.
+
+Currency: The datasets made available are from 2015 and are constantly updated and till date data upto October 2021 is available on the website so the data can be considered current.
+
+Citation: The data is from a known source (Divvy) so it is cited.
+
+And also considering one other important factor to understand the integrity of the data.
+
+Bias: The provided data is assumed unbiased as it records the data for each ride in the city of Chicago on monthly basis irrespective of the time of the day and the group of people.
+
+## Data Processing (Cleaning, Organizing and Manipulating Data)
+I will use RStudio to clean, organize and manipulate data since there 12 .csv files with more than hundred thousands record each file. However, I did use Google Spreadsheets for one of the files for errors and some simple cleaning tasks.
+
+Note: Tidyverse and Janitor Packages are already installed.
+
+#### Loading Libraries
+ 
+```{r Loading Libraries, echo=TRUE}
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+library(tibble)
+library(readr)
+library(janitor)
+library(data.table)
+library(tidyr)
+
+gc()
+```
+
+#### Loading Datasets
+```{r Loading Dataset Nov 2020, echo=TRUE}
+bikeshare_Nov2020 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/11_2020_Nov-divvy-tripdata.csv")
+```
+```{r Loading Dataset Dec 2020, echo=TRUE}
+bikeshare_Dec2020 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/12_2020_Dec-divvy-tripdata.csv")
+```
+```{r Loading Dataset Jan 2021, echo=TRUE}
+bikeshare_Jan2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/01_2021_Jan-divvy-tripdata.csv")
+```
+```{r Loading Dataset Feb 2021, echo=TRUE}
+bikeshare_Feb2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/02_2021_Feb-divvy-tripdata.csv")
+```
+```{r Loading Dataset Mar 2021, echo=TRUE}
+bikeshare_Mar2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/03_2021_Mar-divvy-tripdata.csv")
+```
+```{r Loading Dataset Apr 2021, echo=TRUE}
+bikeshare_Apr2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/04_2021_Apr-divvy-tripdata.csv")
+```
+```{r Loading Dataset May 2021, echo=TRUE}
+bikeshare_May2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/05_2021_May-divvy-tripdata.csv")
+```
+```{r Loading Dataset Jun 2021, echo=TRUE}
+bikeshare_Jun2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/06_2021_Jun-divvy-tripdata.csv")
+```
+```{r Loading Dataset Jul 2021, echo=TRUE}
+bikeshare_Jul2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/07_2021_Jul-divvy-tripdata.csv")
+```
+```{r Loading Dataset Aug 2021, echo=TRUE}
+bikeshare_Aug2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/08_2021_Aug-divvy-tripdata.csv")
+```
+```{r Loading Dataset Sept 2021, echo=TRUE}
+bikeshare_Sep2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/09_2021_Sept-divvy-tripdata.csv")
+```
+```{r Loading Dataset Oct 2021, echo=TRUE}
+bikeshare_Oct2021 <-read.csv("C:/Users/hasan/Documents/Google Data Analytics_Capstone Project_data files/Case_Study_1_data/10_2021_Oct-divvy-tripdata.csv")
+
+gc()
+```
+
+#### Cleaning the Datasets
+
+##### Making the datatypes consistent among all files
+```{r Comparing the data types for all files, echo=TRUE}
+compare_df_cols(bikeshare_Nov2020, bikeshare_Dec2020, bikeshare_Jan2021, 
+                bikeshare_Feb2021, bikeshare_Mar2021, bikeshare_Apr2021, 
+                bikeshare_May2021, bikeshare_Jun2021, bikeshare_Jul2021,
+                bikeshare_Aug2021, bikeshare_Sep2021, bikeshare_Oct2021,
+                return = "mismatch")
+```
+##### Changing the data type for the mismatch columns of "Bikeshare_Nov2020" file 
+```{r Changing the Data type to chr, echo=TRUE}
+bikeshare_Nov2020 <- mutate(bikeshare_Nov2020, start_station_id = as.character(start_station_id),end_station_id = as.character(end_station_id))
+```
+
+```{r Confirming that data types for all columns are consistent, echo=TRUE}
+compare_df_cols(bikeshare_Nov2020, bikeshare_Dec2020, bikeshare_Jan2021, 
+                bikeshare_Feb2021, bikeshare_Mar2021, bikeshare_Apr2021, 
+                bikeshare_May2021, bikeshare_Jun2021, bikeshare_Jul2021,
+                bikeshare_Aug2021, bikeshare_Sep2021, bikeshare_Oct2021,
+                return = "mismatch")
+```
+
+##### To merge all the data files into one file for the whole year
+```{r Merging all the files into one, echo=TRUE}
+bikeshare_one_year_data <- bind_rows(bikeshare_Nov2020, bikeshare_Dec2020, bikeshare_Jan2021, bikeshare_Feb2021, bikeshare_Mar2021, bikeshare_Apr2021, bikeshare_May2021, bikeshare_Jun2021, bikeshare_Jul2021, bikeshare_Aug2021, bikeshare_Sep2021, bikeshare_Oct2021)
+
+gc()
+```
+
+##### Removing all the duplicate observations based on ride_d
+```{r Merging all the files into one, echo=TRUE}
+bikeshare_one_year_data_new <- bikeshare_one_year_data[!duplicated(bikeshare_one_year_data$ride_id),]
+print(paste(nrow(bikeshare_one_year_data)-nrow(bikeshare_one_year_data_new), 
+"duplicated rows were removed"))
+
+gc()
+```
+```{r Clearing the Global Environment Workspace, echo=TRUE}
+rm(bikeshare_Nov2020,bikeshare_Dec2020,bikeshare_Jan2021,bikeshare_Feb2021,
+   bikeshare_Mar2021,bikeshare_Apr2021,bikeshare_May2021,bikeshare_Jun2021,
+   bikeshare_Jul2021,bikeshare_Aug2021,bikeshare_Sep2021,bikeshare_Oct2021)
+
+gc()
+```
+
+##### Removing all the unwanted columns in the file
+```{r Removing all the unwanted columns, echo=TRUE}
+bikeshare_one_year_data_new <- subset(bikeshare_one_year_data_new, select = -c(start_lat,start_lng,end_lat,end_lng))
+
+View(bikeshare_one_year_data_new)
+
+gc()
+```
+
+##### Filling out empty cells in the file with N/A
+```{r Replace empty cells with N/A value, echo=TRUE}
+bikeshare_one_year_data_new[bikeshare_one_year_data_new == "" | bikeshare_one_year_data_new == " "] <- NA
+
+gc()
+```
+
+##### Calculating the ride_duration
+```{r Ride Duration, echo=TRUE}
+bikeshare_one_year_data_new$started_at <- as.POSIXct(bikeshare_one_year_data_new$started_at)
+
+gc()
+
+bikeshare_one_year_data_new$ended_at <- as.POSIXct(bikeshare_one_year_data_new$ended_at)
+
+gc()
+
+bikeshare_one_year_data_new <- bikeshare_one_year_data_new %>%
+   add_column(ride_duration = " ",.after = "ended_at")
+ 
+bikeshare_one_year_data_new$ride_duration <- difftime(bikeshare_one_year_data_new$ended_at, bikeshare_one_year_data_new$started_at,units = "mins")
+
+View(bikeshare_one_year_data_new)
+
+```
+
+##### Removing the ride data with ride duration less than zero
+```{r Deleting rides with negative ride duration, Start Time, End Date, End Time, echo=TRUE}
+bikeshare_one_year_data_new_1 <-subset(bikeshare_one_year_data_new, ride_duration > 0)
+print(paste(nrow(bikeshare_one_year_data_new)-nrow(bikeshare_one_year_data_new_1), 
+"incorrect rows were removed"))
+```
+```{r Clearing the Global Environment Workspace, echo=TRUE}
+rm(bikeshare_one_year_data_new, bikeshare_one_year_data)
+
+gc()
+```
+
+
+##### Splitting the date and time in columns started_at and ended_at
+```{r Start Date, Start Time, End Date, End Time, echo=TRUE}
+bikeshare_one_year_data_new_1 <- bikeshare_one_year_data_new_1 %>%
+  separate(started_at, c("start_date","start_time"), " ")
+
+gc()
+```
+
+```{r Start Date, Start Time, End Date, End Time, echo=TRUE}
+bikeshare_one_year_data_new_1 <- bikeshare_one_year_data_new_1 %>%
+  separate(ended_at, c("end_date","end_time"), " ")
+
+gc()
+```
+
+
+##### Change the Data Type for start date and end date to date
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1$start_date <- as.Date(bikeshare_one_year_data_new_1$start_date)
+
+bikeshare_one_year_data_new_1$end_date <- as.Date(bikeshare_one_year_data_new_1$end_date)
+```
+
+##### Calculating Day of the week based on the Start Date
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 <- bikeshare_one_year_data_new_1 %>%
+  add_column(day_of_the_week = " ",
+             .before = "start_date")
+
+bikeshare_one_year_data_new_1$day_of_the_week <- weekdays(as.Date(bikeshare_one_year_data_new_1$start_date))
+```
+
+##### Changing the Data type of ride_duration to numeric
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1$ride_duration <- as.numeric(bikeshare_one_year_data_new_1$ride_duration)
+```
+
+## Data Analysis
+
+#### Analyzing the dataset
+```{r echo=TRUE}
+summary(bikeshare_one_year_data_new_1)
+```
+
+##### Basic Calculations for ride_duration
+```{r ride_duration calculations, echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+    summarize(Mean = mean(ride_duration), Max = max(ride_duration), 
+              Min = min(ride_duration))
+```
+
+##### Day of the week when most trips are taken
+```{r ride_duration calculations, echo=TRUE}
+getmode <- function(v) {
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+bikeshare_one_year_data_new_1 %>%
+  summarize(Mode = getmode(day_of_the_week))
+```
+
+##### Summary of ride_duration for members and casual riders 
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(member_casual) %>%
+    summarise(ride_mean = mean(ride_duration),
+              ride_median = median(ride_duration),
+              ride_max = max(ride_duration),
+              ride_min = min(ride_duration),
+              Count = n())
+```
+
+
+##### Average ride_duration for members and casual riders by day_of_the_week
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>% 
+  group_by(day_of_the_week, member_casual = "casual") %>% 
+    summarize(Avg = mean(ride_duration))
+```
+##### No of rides for users by day of the week
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(member_casual,day_of_the_week) %>%
+    summarize(Count = n()) %>%
+      arrange(desc(Count))
+```
+##### Creating a new column Season for further analysis
+```{r echo=TRUE}
+# Create a column "season" 
+bikeshare_one_year_data_new_1 <- bikeshare_one_year_data_new_1 %>%
+  add_column(season = " ",
+             .before = "start_date")
+
+# Function for creating season based on date
+getSeason <- function(DATES) {
+  WS <- as.Date("2012-12-01", format = "%Y-%m-%d") # Winter Solstice
+  SE <- as.Date("2012-03-01",  format = "%Y-%m-%d") # Spring Equinox
+  SS <- as.Date("2012-06-01",  format = "%Y-%m-%d") # Summer Solstice
+  FE <- as.Date("2012-09-01",  format = "%Y-%m-%d") # Fall Equinox
+  
+  # Convert dates from any year to 2012 dates
+  d <- as.Date(strftime(DATES, format="2012-%m-%d"))
+  
+  ifelse (d >= WS | d < SE, "Winter",
+          ifelse (d >= SE & d < SS, "Spring",
+                  ifelse (d >= SS & d < FE, "Summer", "Fall")))
+}
+
+bikeshare_one_year_data_new_1$season <- getSeason(bikeshare_one_year_data_new_1$start_date)
+```
+
+##### Calculation of no.of rides based on Season and member_casual
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(member_casual = "casual",season) %>%
+    summarize(Count = n()) %>%
+      arrange(desc(Count))
+```
+
+##### Calculation of no. of rides based on bike type and member_casual
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(member_casual, rideable_type) %>%
+    summarize(Count = n()) %>%
+      arrange(desc(Count))
+```
+
+##### Most popular stations for casual members to pick up the bike
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(member_casual = "casual", start_station_name) %>%
+    summarize(Count = n()) %>%
+      arrange(desc(Count))
+```
+##### Calculation of no.of rides based on time_of_day and member_casual
+
+```{r echo=TRUE}
+# Create a column "time_of_day" 
+bikeshare_one_year_data_new_1 <- bikeshare_one_year_data_new_1 %>%
+  add_column(time_of_day = " ",
+             .before = "season")
+
+# Function for creating time_of_day based on start_time
+getTimeOfDay <- function(TOD) {
+  x <- as.POSIXct(strptime(TOD, "%H:%M:%S"))
+  
+  y=as.POSIXct(strptime(c("060000","115959","120000","155959","160000",
+                         "205959"),"%H%M%S"))
+  
+  case_when(
+    between(x,y[1],y[2]) ~"morning",
+    between(x,y[3],y[4]) ~"afternoon",
+    between(x,y[5],y[6]) ~"evening",
+    TRUE ~"night")
+}
+
+bikeshare_one_year_data_new_1$time_of_day <- getTimeOfDay(bikeshare_one_year_data_new_1$start_time)
+
+```
+
+##### Calculation of no.of rides based on time_of_day and day_of_the_week
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(time_of_day,day_of_the_week,member_casual = "casual") %>%
+    summarize(Count = n()) %>%
+      arrange(desc(Count))
+```
+
+## Data Visualizations with plots
+
+
+##### Comparing No. of rides for User Type
+```{r Member vs Casual, echo=TRUE}
+bikeshare_one_year_data_new_1 %>% 
+  ggplot() + geom_bar(mapping = aes(x = member_casual, fill = member_casual )) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Total Rides by User Type",x= "User Type", y= "Quantity") +
+  scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                        "casual" = "lightblue"))
+
+```
+##### Comparing No. of rides for User type by day_of_the_week
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1%>%
+  group_by(member_casual, day_of_the_week) %>%
+    summarize(number_rides = n()) %>%
+      arrange(member_casual, day_of_the_week) %>%
+        ggplot(aes(x= day_of_the_week, y= number_rides, fill = member_casual)) +
+        geom_col(position = "dodge") +
+        labs(x = "Week Day", title = "Number of Rides by User")+
+        theme(plot.title = element_text(hjust = 0.5)) +
+        scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                                  "casual" = "lightblue"))
+```
+##### Comparing avg_ride_duration for User type by day_of_the_week
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>%
+  group_by(member_casual, day_of_the_week) %>%
+    summarise(number_rides = n(), avg_duration = mean(ride_duration)) %>%
+  ggplot(aes(x=day_of_the_week, y= avg_duration,
+            fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Weekday", title = "Average Ride Duration by Weekday")+
+  theme(axis.text.x=element_text(angle= 25), 
+        plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                            "casual" = "lightblue"))
+```
+
+##### Comparing No. of rides for User type by season
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1%>%
+  group_by(member_casual, season) %>%
+    summarize(number_rides = n()) %>%
+      arrange(member_casual, season) %>%
+        ggplot(aes(x= season, y= number_rides, fill = member_casual)) +
+        geom_col(position = "dodge") +
+        labs(x = "Seasons", title = "Number of Rides by Season")+
+        theme(plot.title = element_text(hjust = 0.5)) +
+        scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                                  "casual" = "lightblue"))
+```
+
+##### Comparing No. of rides for User type by rideable_type
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>% 
+  group_by(rideable_type, member_casual) %>%
+    summarise(number_of_ride = n()) %>%
+      ggplot(aes(x= rideable_type, y= number_of_ride, fill= member_casual)) +
+      labs(x= "Type of Bike", title= "Users by Type of Bike") +
+      geom_col(position = "dodge") +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                                "casual" = "lightblue"))
+```
+
+##### Comparing No. of rides for User type by time_of_day
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1%>%
+  group_by(member_casual, time_of_day, day_of_the_week) %>%
+    summarize(number_rides = n()) %>%
+      arrange(member_casual, time_of_day, day_of_the_week) %>%
+        ggplot(aes(x= time_of_day, y= number_rides, fill = member_casual)) +
+        geom_col(position = "dodge") + facet_wrap(~day_of_the_week) +
+        labs(x = "Time of Day", title = "Number of Rides by Time of Day")+
+        theme(plot.title = element_text(hjust = 0.5)) +
+        scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                                  "casual" = "lightblue"))
+        
+```
+
+##### Distribution by User Type based on hour of the day
+```{r echo=TRUE}
+#Create a column "time_of_day"
+bikeshare_one_year_data_new_1 <- bikeshare_one_year_data_new_1 %>%
+  add_column(start_time_hour = " ",
+             .after = "start_time")
+
+bikeshare_one_year_data_new_1$start_time_hour <- strftime(as.POSIXct(strptime(bikeshare_one_year_data_new_1$start_time, "%H:%M:%S")),"%H")
+
+bikeshare_one_year_data_new_1 %>% 
+  ggplot(aes(x= start_time_hour, fill= member_casual)) +
+  labs(x= " Start Hour", 
+       title= "Distribution by User Type per Hour") +
+  geom_bar() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x=element_text(angle= 90), 
+      plot.title = element_text(hjust = 0.5))+
+  scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                         "casual" = "lightblue"))
+```
+
+##### Distribution by User Type based on hour of the day for the week
+```{r echo=TRUE}
+bikeshare_one_year_data_new_1 %>% 
+  ggplot(aes(x= start_time_hour, fill= member_casual)) +
+  labs(x= " Start Hour", 
+       title= "Distribution by User/hour per Day") +
+  geom_bar() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  facet_wrap(~day_of_the_week) +
+  theme(axis.text.x=element_text(angle= 90), 
+        plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual("User Type", values = c("member" = "darkblue",
+                                         "casual" = "lightblue"))
+
+```
+
+### Saving the file for further analysis at a later date
+```{r echo=TRUE}
+write.csv(bikeshare_one_year_data_new_1, "cyclistic_data.csv")
+```
+
+## Concluding Observations
+1) Almost 46% of the riders are casual riders.
+2) The average ride duration for casual riders is more than double as that of the members.
+3) Most of the casual riders book the ride on Saturday and Sunday.
+4) Most of the casual riders book the ride in the season of Summer and Fall.
+5) Interestingly, docked bike type is used by casual riders than members but the numbers are still significantly smaller than the electric bike type and classic bike type in terms of total no. of booked bikes.
+6) Almost 25% of the casual riders do not provide information about from which station they pick up the bike while the other popular stations are Streeter Dr & Grand Ave, Michigan Ave & Oak St, Wells St & Concord Ln, Millennium Park, and	Clark St & Elm St.
+7) Casual Riders book rides mostly in evening and afternoon mostly from (12pm to 6pm).
+
+## Recommendations
+There is a big potential of converting casual riders to members and it is the right way to bring the company forward as they constitute about 46% of the total riders, so I would recommend the following actions:
+
+1) Offer a discount on membership to casual riders based on:
+  - Booking rides on Weekends
+  - Booking rides in the season of Summer and Fall
+  - Based on the inventory, if they use docked bike type as it is least utilized but         casual members prefer that bike type more than current members.
+  
+  
+2) The company can use various digital marketing channels to update the casual riders the offers and discounts on becoming members at the frequently used start stations.
+
+3) Starting a royalty program for the members who rides for a certain hours/miles.
+
